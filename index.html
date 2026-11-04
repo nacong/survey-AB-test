@@ -20,6 +20,7 @@
 @media(max-width:420px){.form-body{padding:25px 20px}.style-b .intro,.style-b .block{padding:22px 20px}.intro h1{font-size:23px}.style-b .privacy-data>div{grid-template-columns:86px 1fr;gap:10px}.style-b .privacy-data{padding:15px}.style-b .condition-list>div{grid-template-columns:68px 1fr;gap:10px}.style-a .privacy-data dd{font-size:12px;padding:12px 6px}.variant-desc{display:none}.view-switch button{padding:10px 9px}.participant .workspace{padding:0}.participant .screen{border:0;border-radius:0}.participant .style-b .screen{padding-bottom:20px}}
 @media(prefers-reduced-motion:no-preference){button,.option{transition:background .15s,border-color .15s}}
 @media print{.reviewbar,.below-note,.actions,.survey-buttons{display:none}.workspace{max-width:none;display:block;padding:0}.variant{break-after:page}.screen{border:0!important}}
+.analytics-note{font-size:11px;line-height:1.8;color:var(--muted);text-align:center;padding:18px 26px 24px;word-break:keep-all}
 </style>
 </head>
 <body>
@@ -28,18 +29,18 @@
  <nav class="view-switch" aria-label="화면 보기"><button data-view="A" aria-pressed="true">A</button><button data-view="B" aria-pressed="false">B</button></nav></div>
  <details class="review-detail"><summary>A/B 테스트 안내</summary><div class="detail-grid">
  <div><strong>A/B 화면 구조</strong><p>A — 연속 문서, 테두리 표, 오른쪽 선택 버튼.</p><p>B — 제목·문항별 카드, 항목명과 값으로 나뉜 안내, 왼쪽 선택 버튼.</p></div>
- <div><strong>이 파일에서 통제한 조건</strong><p>글자·색상·폰트·선택지·버튼 문구·초기 상태·분기 로직은 같습니다. A는 연속 문서와 열형 표, B는 카드와 행형 목록으로 재구성했습니다. 브랜드 신뢰 효과가 섞이지 않도록 서비스 로고는 사용하지 않았습니다.</p><p>소요 시간 5분, 휴대전화 번호 수집, 상품권 발송 목적, 발송 완료 후 7일 이내 파기는 테스트용 가정입니다. 실제 번호는 입력받지 않으며 응답도 전송·저장하지 않습니다. 본문은 진입 확인용 1문항만 제공합니다.</p></div>
+ <div><strong>이 파일에서 통제한 조건</strong><p>글자·색상·폰트·선택지·버튼 문구·초기 상태·분기 로직은 같습니다. A는 연속 문서와 열형 표, B는 카드와 행형 목록으로 재구성했습니다. 브랜드 신뢰 효과가 섞이지 않도록 서비스 로고는 사용하지 않았습니다.</p><p>소요 시간 5분, 휴대전화 번호 수집, 상품권 발송 목적, 발송 완료 후 7일 이내 파기는 테스트용 가정입니다. 실제 번호는 입력받지 않으며 설문 응답 내용도 전송·저장하지 않습니다. 화면 조회·설문 시작·완료 기록은 A/B 구분과 함께 Amplitude로 전송합니다. 본문은 진입 확인용 1문항만 제공합니다.</p></div>
  </div><div class="test-tools"><button class="small-btn" data-test="A">A만 테스트</button><button class="small-btn" data-test="B">B만 테스트</button><button class="small-btn" data-test="random">무작위 1개 테스트</button><span>테스트 화면에서 Esc를 누르면 A/B 전환 화면으로 돌아옵니다. 새 테스트는 선택을 초기화합니다.</span></div></details>
 </header>
 <main id="workspace" class="workspace single" aria-label="설문 화면"></main>
-<footer class="below-note">오프라인 프로토타입 · A/B 전환 시 각 화면의 선택은 유지됩니다. 테스트 화면은 주소 끝에 #test-A 또는 #test-B를 붙여서도 열 수 있습니다.</footer>
+<footer class="below-note">A/B 전환 시 각 화면의 선택은 유지됩니다. 테스트 화면은 주소 끝에 #test-A 또는 #test-B를 붙여서도 열 수 있습니다.</footer>
 <noscript><p style="padding:30px">이 HTML의 A/B 전환 및 선택 기능을 사용하려면 브라우저에서 JavaScript를 허용해 주세요.</p></noscript>
 <script>
 'use strict';
-// One source of participant copy for both variants. No external libraries, fonts or requests.
+// One source of participant copy for both variants. Analytics loads independently; survey interactions also work offline.
 const COPY = Object.freeze({
  title:'온라인 설문 참여 경험 및 참여 결정 요인',
- demo:'가상 화면 · 실제 개인정보를 수집하지 않습니다.',
+ demo:'가상 화면 · 실제 연락처를 입력받지 않습니다.',
  intro:'안녕하세요! 온라인 설문에 참여하거나 중단했던 경험과, 설문 참여 여부를 결정할 때 중요하게 생각하는 점을 알아보고자 합니다.',
  target:'최근 3개월 내 개인정보 수집 안내가 포함된 온라인 설문에 참여한 경험이 있는 성인',
  targetNote:'끝까지 응답하지 않은 경험도 괜찮습니다.',
@@ -54,6 +55,65 @@ const COPY = Object.freeze({
  consent:'위와 같이 개인정보를 수집·이용하는 것에 동의하십니까?',
  question:'최근 3개월 안에 개인정보 수집 안내가 포함된 온라인 설문을 열어본 적이 있나요?'
 });
+// Public Amplitude project key. No secret key or respondent answers are used.
+const ANALYTICS = (() => {
+ const API_KEY='98895507136ec5b2ace72368eeece427';
+ const environment=location.protocol==='file:'||['localhost','127.0.0.1','::1','[::1]'].includes(location.hostname)?'development':'production';
+ const pending=[];
+ let ready=false,failed=false;
+ function deliver(event){
+  try{
+   window.amplitude.track(event.name,event.properties,{time:event.time}).promise.then(result=>{
+    if(environment==='development') console.info('[Survey analytics]',event.name,result.code);
+   }).catch(()=>{});
+  }catch(_){} // Measurement must never block the form.
+ }
+ const script=document.createElement('script');
+ script.async=true;
+ script.src='https://cdn.amplitude.com/libs/analytics-browser-2.48.1-min.js.gz';
+ script.referrerPolicy='no-referrer';
+ script.onload=async()=>{
+  try{
+   await window.amplitude.init(API_KEY,{
+    autocapture:false,
+    remoteConfig:{fetchRemoteConfig:false},
+    enableDiagnostics:false,
+    trackingOptions:{ipAddress:false},
+    identityStorage:'localStorage',
+    transport:{type:'fetch',enableKeepalive:true,referrerPolicy:'no-referrer'},
+    serverZone:'US',
+    flushIntervalMillis:1000
+   }).promise;
+   ready=true;
+   pending.splice(0).forEach(deliver);
+  }catch(_){failed=true;pending.length=0;}
+ };
+ script.onerror=()=>{failed=true;pending.length=0;};
+ document.head.appendChild(script);
+ window.addEventListener('pagehide',()=>{if(ready){try{window.amplitude.flush();}catch(_){}}});
+ return {track(name,properties){
+  const event={name,properties:{...properties,environment,experiment_id:'survey-layout-v1'},time:Date.now()};
+  if(ready)deliver(event);
+  else if(!failed&&pending.length<100)pending.push(event);
+ }};
+})();
+// One funnel per attempt and mode. Switching views or going back does not double-count it.
+const flows={A:null,B:null};
+function newFlow(v){flows[v]={id:typeof crypto.randomUUID==='function'?crypto.randomUUID():Date.now().toString(36)+'-'+Math.random().toString(36).slice(2),mode:null,viewedAt:0,startedAt:0,sent:new Set()};}
+function trackStep(name,v){
+ const viewMode=mode.startsWith('test-')?'test':'preview';
+ if(!flows[v]||(flows[v].mode&&flows[v].mode!==viewMode))newFlow(v);
+ const flow=flows[v];flow.mode=viewMode;
+ if(flow.sent.has(name))return;
+ const now=Date.now();
+ if(name==='survey_viewed')flow.viewedAt=now;
+ if(name==='survey_started')flow.startedAt=now;
+ flow.sent.add(name);
+ const properties={variant:v,mode:viewMode,flow_id:flow.id};
+ if(name==='survey_started')properties.time_to_start_ms=Math.max(0,now-flow.viewedAt);
+ if(name==='survey_completed')properties.completion_time_ms=Math.max(0,now-flow.startedAt);
+ ANALYTICS.track(name,properties);
+}
 const state={A:{step:'intro',consent:null,answer:null},B:{step:'intro',consent:null,answer:null}};
 let mode='A';
 const workspace=document.getElementById('workspace');
@@ -70,15 +130,15 @@ function intro(v){return `
  <div class="actions"><button class="primary" data-action="start">설문 시작하기</button><p class="action-note">이 화면의 참여 조건과 보상은 테스트용 예시입니다.</p></div><p class="page-foot">화면 체험용 · 실제 응답은 제출되지 않습니다.</p>`;}
 function body(v){return `<div class="body-stage"><span class="demo-label">${COPY.demo}</span><p class="step-caption">설문 본문 · 1 / 1</p><h2 class="question-title" tabindex="-1">${COPY.question}</h2><p class="question-help">${COPY.targetNote}</p><fieldset><legend class="required">* 하나를 선택해 주세요</legend>${radios(v,'answer',[['yes','예'],['no','아니요']])}</fieldset><p class="error" id="error-${v}" role="alert" hidden></p><div class="survey-buttons"><button class="secondary" data-action="back">이전</button><button class="primary" data-action="finish">응답 완료</button></div><p class="action-note">본문 진입을 확인하기 위한 예시 1문항입니다.</p></div>`;}
 function outcome(v){const declined=state[v].step==='declined';return `<div class="body-stage outcome"><span class="demo-label">${COPY.demo}</span><div class="done-icon" aria-hidden="true">${declined?'−':'✓'}</div><h2 tabindex="-1">${declined?'참여를 종료했습니다':'화면 체험을 완료했습니다'}</h2><p>${declined?'동의하지 않음을 선택하셨습니다.<br>응답이나 개인정보는 저장되지 않았습니다.':'안내 확인부터 설문 본문까지의 흐름을 체험했습니다.<br>응답은 전송·저장되지 않았으며 실제 경품 응모도 이루어지지 않았습니다.'}</p><button class="secondary" data-action="reset">처음으로 돌아가기</button></div>`;}
-function renderVariant(v,focus=false){const el=document.getElementById('variant-'+v);el.innerHTML=`<div class="variant-label"><span class="variant-letter">${v}</span></div><div class="screen"><div class="sheet-top"></div><div class="form-body">${state[v].step==='intro'?intro(v):state[v].step==='body'?body(v):outcome(v)}</div></div>`;if(focus){el.querySelector('h1,h2').focus({preventScroll:true});el.scrollIntoView({block:'start',behavior:'instant'});}}
+function renderVariant(v,focus=false){const el=document.getElementById('variant-'+v);el.innerHTML=`<div class="variant-label"><span class="variant-letter">${v}</span></div><div class="screen"><div class="sheet-top"></div><div class="form-body">${state[v].step==='intro'?intro(v):state[v].step==='body'?body(v):outcome(v)}</div><p class="analytics-note">화면 이용 기록과 익명 방문 식별자는 Amplitude로 전송됩니다. 설문 응답 내용과 연락처는 전송하지 않습니다.</p></div>`;if(focus){el.querySelector('h1,h2').focus({preventScroll:true});el.scrollIntoView({block:'start',behavior:'instant'});}}
 for(const v of ['A','B']){const article=document.createElement('article');article.id='variant-'+v;article.className='variant style-'+v.toLowerCase();article.setAttribute('aria-label',v+' 설문 화면');workspace.append(article);renderVariant(v);}
-function setView(next){mode=next;const testing=next.startsWith('test-');const selected=testing?next.slice(5):next;document.body.classList.toggle('participant',testing);workspace.classList.add('single');for(const v of ['A','B'])document.getElementById('variant-'+v).hidden=v!==selected;document.querySelectorAll('[data-view]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.view===selected)));document.title=testing?'온라인 설문 참여 안내':'설문 참여 화면 A/B';}
+function setView(next){mode=next;const testing=next.startsWith('test-');const selected=testing?next.slice(5):next;if(flows[selected]?.mode&&flows[selected].mode!==(testing?'test':'preview'))reset(selected);trackStep('survey_viewed',selected);document.body.classList.toggle('participant',testing);workspace.classList.add('single');for(const v of ['A','B'])document.getElementById('variant-'+v).hidden=v!==selected;document.querySelectorAll('[data-view]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.view===selected)));document.title=testing?'온라인 설문 참여 안내':'설문 참여 화면 A/B';}
 function route(){const value=location.hash.slice(1);setView(['A','B','test-A','test-B'].includes(value)?value:'A');}
 function navigate(next){if(location.hash==='#'+next)setView(next);else location.hash=next;window.scrollTo(0,0);}
-function reset(v){state[v]={step:'intro',consent:null,answer:null};renderVariant(v,true);}
+function reset(v){newFlow(v);state[v]={step:'intro',consent:null,answer:null};renderVariant(v,true);}
 function error(v,msg){const el=document.getElementById('error-'+v);el.textContent=msg;el.hidden=false;document.querySelector(`#variant-${v} input`).focus();}
 document.addEventListener('change',e=>{if(!e.target.matches('input[type=radio]'))return;const [type,v]=e.target.name.split('-');state[v][type]=e.target.value;const err=document.getElementById('error-'+v);if(err)err.hidden=true;});
-document.addEventListener('click',e=>{const btn=e.target.closest('button');if(!btn)return;if(btn.dataset.view){navigate(btn.dataset.view);return;}if(btn.dataset.test){const v=btn.dataset.test==='random'?(Math.random()<.5?'A':'B'):btn.dataset.test;reset(v);navigate('test-'+v);return;}const article=btn.closest('.variant');if(!article)return;const v=article.id.slice(-1);const action=btn.dataset.action;if(action==='start'){if(!state[v].consent){error(v,'동의 여부를 선택해 주세요.');return;}state[v].step=state[v].consent==='yes'?'body':'declined';}else if(action==='finish'){if(!state[v].answer){error(v,'답변을 선택해 주세요.');return;}state[v].step='done';}else if(action==='back'){state[v].step='intro';}else if(action==='reset'){reset(v);return;}else return;renderVariant(v,true);});
+document.addEventListener('click',e=>{const btn=e.target.closest('button');if(!btn)return;if(btn.dataset.view){navigate(btn.dataset.view);return;}if(btn.dataset.test){const v=btn.dataset.test==='random'?(Math.random()<.5?'A':'B'):btn.dataset.test;reset(v);navigate('test-'+v);return;}const article=btn.closest('.variant');if(!article)return;const v=article.id.slice(-1);const action=btn.dataset.action;if(action==='start'){if(!state[v].consent){error(v,'동의 여부를 선택해 주세요.');return;}state[v].step=state[v].consent==='yes'?'body':'declined';if(state[v].step==='body')trackStep('survey_started',v);}else if(action==='finish'){if(!state[v].answer){error(v,'답변을 선택해 주세요.');return;}state[v].step='done';trackStep('survey_completed',v);}else if(action==='back'){state[v].step='intro';}else if(action==='reset'){reset(v);trackStep('survey_viewed',v);return;}else return;renderVariant(v,true);});
 document.addEventListener('keydown',e=>{if(e.key==='Escape'&&mode.startsWith('test-'))navigate(mode.slice(5));});
 window.addEventListener('hashchange',route);route();
 </script>
